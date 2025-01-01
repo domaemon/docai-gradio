@@ -169,3 +169,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# setting env variable
+1_env_export.sh
+2_service_account_setup.sh
+3_cloud_deploy.sh
+
+# service account
+document-ai-gradio.json
