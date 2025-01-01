@@ -1,0 +1,9 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build',
+          '--build-arg', 'PROJECT_ID=${_PROJECT_ID}',
+          '--build-arg', 'GCP_DOCAI_REGION=${_GCP_DOCAI_REGION}',
+          '--build-arg', 'GCP_DOCAI_PROCESSOR_ID=${_GCP_DOCAI_PROCESSOR_ID}',
+          '-t', '${_IMAGE_URL}', '.']
+images:
+- '${_IMAGE_URL}' 
