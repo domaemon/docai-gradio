@@ -170,6 +170,9 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# gradio files
+.gradio/
+
 # setting env variable
 1_env_export.sh
 2_service_account_setup.sh
