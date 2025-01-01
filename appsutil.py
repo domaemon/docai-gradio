@@ -3,9 +3,9 @@ from google.cloud import documentai_v1 as documentai
 from PIL import Image, ImageDraw
 from google import genai
 from google.genai import types
+import logging
 
 def process_document(image_path):
-    docis_entities = {}
 
     docai_image, docai_summary, docai_entities = process_docai(image_path)
     vertex_summary = process_vertex(image_path, docai_summary)
@@ -25,11 +25,13 @@ def process_docai(image_path):
     )
 
     # The full resource name of the processor, e.g.:
-    project_id = os.environ.get('PROJECT')
-    location = os.environ.get('GCP_DOCAI_REGION')
-    processor_id = os.environ.get('GCP_DOCAI_PROCESSOR_ID')
+    project = os.environ.get('PROJECT')
+    location = os.environ.get('DOCAI_REGION')
+    processor_id = os.environ.get('DOCAI_PROCESSOR_ID')
 
-    name = f"projects/{project_id}/locations/{location}/processors/{processor_id}"
+    name = f"projects/{project}/locations/{location}/processors/{processor_id}"
+
+    logging.warning("docai - endpoint: " + name)
 
     # Configure the process request
     request = documentai.ProcessRequest(name=name, raw_document=raw_document)
@@ -74,8 +76,8 @@ def process_docai(image_path):
 def process_vertex(image_path, docai_summary):
     client = genai.Client(
         vertexai=True,
-        project="document-ai-gradio",
-        location="us-central1"
+        project=os.environ.get('PROJECT'),
+        location='us-central1'
     )
 
     with open(image_path, 'rb') as image_file:
