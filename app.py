@@ -7,7 +7,7 @@ demo = gr.Interface(
     outputs=[
              gr.Image(label="docai-image"),
              gr.Text(label="docai-summary"),
-             gr.Text(label="vertex-summary"),
+             gr.Markdown(label="vertex-summary"),
              ],
     #allow_flagging="never" 
 )
