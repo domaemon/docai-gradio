@@ -1,54 +1,25 @@
 import os
 import logging
-import shutils
+import shutil
 from google.cloud import documentai_v1 as documentai
 from PIL import Image, ImageDraw
 from google import genai
 from google.genai import types
 
-def check_cloud_run():
-    """Checks if the code is running on Cloud Run.
-
-    Returns:
-        True if running on Cloud Run, False otherwise.
-    """
-    return os.environ.get('K_SERVICE') is not None
-
-def check_dir_exists(dir_path):
-    """Checks if a directory exists.
-    
-    Args:
-     directory_path: The path to the directory.
-
-    Returns:
-     True if the directory exists, False otherwise.
-    """
-    if os.path.exists(dir_path) and os.path.isdir(dir_path):
-        result = "EXISTS"
-    else:
-        result = "DOES NOT EXIST"
-     
-    return result
-
 def process_document(image_path):
     docai_entities = {}
 
     if check_cloud_run():
-        logging.warning("docai - running on Cloud Run")
-        logging.warning("docai - image_path: " + image_path)
-        logging.warning("docai - /app/cloud-storage: " + check_dir_exists('/app/cloud-storage/'))
-
         image_name = os.path.basename(image_path)
         new_image_path = '/app/cloud-storage/' + image_name
         #copy to the cloud storage
         shutil.copy2(image_path, new_image_path)
         image_path = new_image_path
-
-        logging.warning("docai - new_image_path: " + new_image_path)
     else:
         print("Running locally")
 
     docai_image, docai_summary, docai_entities = process_docai(image_path)
+
     vertex_summary = process_vertex(image_path, docai_summary)
 
     return docai_image, docai_summary, vertex_summary
@@ -71,8 +42,6 @@ def process_docai(image_path):
     processor_id = os.environ.get('DOCAI_PROCESSOR_ID')
 
     name = f"projects/{project}/locations/{location}/processors/{processor_id}"
-
-    logging.warning("docai - endpoint: " + name)
 
     # Configure the process request
     request = documentai.ProcessRequest(name=name, raw_document=raw_document)
@@ -170,6 +139,33 @@ def process_vertex(image_path, docai_summary):
 
         # Print the entire response text
         return response.text
+
+def check_cloud_run():
+    """Checks if the code is running on Cloud Run.
+
+    Returns:
+        True if running on Cloud Run, False otherwise.
+    """
+    return os.environ.get('K_SERVICE') is not None
+
+def check_dir_exists(dir_path):
+    """Checks if a directory exists.
+    
+    Args:
+     dir_path: The path to the directory.
+
+    Returns:
+     True if the directory exists, False otherwise.
+    """
+    if os.path.exists(dir_path) and os.path.isdir(dir_path):
+        if os.access(dir_path, os.W_OK):
+            result = "EXISTS WRITABLE"
+        else:
+            result = "EXISTS NOT WRITABLE"
+    else:
+        result = "DOES NOT EXIST"
+     
+    return result
 
 #######
 # docai_entities['invoice-date'],
