@@ -7,6 +7,8 @@ from google import genai
 from google.genai import types
 
 def process_document(image_path):
+    outputs = [None, None, None]
+    
     docai_entities = {}
 
     if check_cloud_run():
@@ -19,10 +21,12 @@ def process_document(image_path):
         print("Running locally")
 
     docai_image, docai_summary, docai_entities = process_docai(image_path)
+    yield[docai_image, docai_summary, None]
 
     vertex_summary = process_vertex(image_path, docai_summary)
 
-    return docai_image, docai_summary, vertex_summary
+    yield[docai_image, docai_summary, vertex_summary]
+    #return docai_image, docai_summary, vertex_summary
 
 def process_docai(image_path):
     docai_entities = {}
